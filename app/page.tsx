@@ -1,101 +1,121 @@
-import Image from "next/image";
+"use client"
+
+import { Layout, Button, Row, Col, Card, Typography } from "antd"
+import { Image } from "antd";
+
+const { Header, Footer, Content } = Layout
+const { Title, Text } = Typography
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <Layout>
+      <Content>
+        {/* Hero Section */}
+        <section style={{ padding: "60px 0", background: "#f5f5f5" }}>
+          <Row justify="center" align="middle" gutter={[48, 48]}>
+            <Col xs={24} md={12} style={{ padding: "0 50px" }}>
+              <Title level={1}>Explore Fresh Cosmetic Arrivals</Title>
+              <Text style={{ fontSize: "18px", marginBottom: "24px", display: "block" }}>
+                Experience Beauty's Newest Delights! Discover Fresh Makeup, Skincare, and Beauty Products to Enhance
+                Your Natural Glow
+              </Text>
+              <Button type="primary" size="large">
+                Shop now
+              </Button>
+            </Col>
+            <Col xs={24} md={12}>
+              <Image
+                src="/placeholder.svg"
+                alt="Cosmetics collection"
+                width={500}
+                height={400}
+                style={{ objectFit: "cover" }}
+              />
+            </Col>
+          </Row>
+        </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+        {/* Promotions */}
+        <section style={{ padding: "40px 50px", background: "#fff" }}>
+          <Row gutter={[24, 24]} justify="center">
+            <Col xs={24} md={8}>
+              <Card>
+                <Title level={5}>Save 25% with Code 'NEW'</Title>
+              </Card>
+            </Col>
+            <Col xs={24} md={8}>
+              <Card>
+                <Title level={5}>Enjoy 15% Off Your Next Beauty Purchase!</Title>
+              </Card>
+            </Col>
+            <Col xs={24} md={8}>
+              <Card>
+                <Title level={5}>Enjoy 60 Days of Free Returns</Title>
+              </Card>
+            </Col>
+          </Row>
+        </section>
+
+        {/* Collections */}
+        <section style={{ padding: "40px 50px", background: "#f5f5f5" }}>
+          <Title level={2} style={{ marginBottom: "40px" }}>
+            Collections
+          </Title>
+          <Row gutter={[24, 24]}>
+            <Col xs={24} md={8}>
+              <Card cover={<Image src="/placeholder.svg" alt="Adventure Seeker Collection" width={400} height={300} />}>
+                <Card.Meta title="Adventure Seeker Collection" />
+              </Card>
+            </Col>
+            <Col xs={24} md={8}>
+              <Card cover={<Image src="/placeholder.svg" alt="Street Travel Collection" width={400} height={300} />}>
+                <Card.Meta title="Street Travel Collection" />
+              </Card>
+            </Col>
+            <Col xs={24} md={8}>
+              <Card
+                cover={<Image src="/placeholder.svg" alt="Everyday Essentials Collection" width={400} height={300} />}
+              >
+                <Card.Meta title="Everyday Essentials Collection" />
+              </Card>
+            </Col>
+          </Row>
+        </section>
+
+        {/* Similar Products */}
+        <section style={{ padding: "40px 50px", background: "#fff" }}>
+          <Title level={2} style={{ marginBottom: "40px" }}>
+            Similar Products
+          </Title>
+          <Row gutter={[24, 24]}>
+            {[1, 2, 3, 4].map((item) => (
+              <Col xs={24} sm={12} md={6} key={item}>
+                <Card cover={<Image src="/placeholder.svg" alt={`Product ${item}`} width={300} height={200} />}>
+                  <Card.Meta title="Funky Sunglasses" description={<Text strong>$99.99</Text>} />
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </section>
+
+        {/* Newsletter */}
+        <section style={{ padding: "60px 50px", background: "#141414", textAlign: "center" }}>
+          <Row justify="center">
+            <Col xs={24} md={16} lg={12}>
+              <Title level={2} style={{ color: "#fff", marginBottom: "24px" }}>
+                Explore Our Newest Cosmetic Arrivals!
+              </Title>
+              <Text style={{ color: "#fff", marginBottom: "24px", display: "block" }}>
+                Our latest cosmetic arrivals have just landed, and they're sure to dazzle you. Check out the freshest
+                arrivals, skincare, beauty products and elevate your beauty routine.
+              </Text>
+              <Button type="primary" size="large">
+                Shop now
+              </Button>
+            </Col>
+          </Row>
+        </section>
+      </Content>
+    </Layout>
+  )
 }
