@@ -1,0 +1,31 @@
+{
+  "users": [],
+  "orders": [
+    {
+      "userId": "U78335721",
+      "items": [
+        {
+          "id": 7,
+          "title": "White Gold Plated Princess",
+          "price": 9.99,
+          "image": "https://fakestoreapi.com/img/71YAIFU48IL._AC_UL640_QL65_ML3_.jpg",
+          "quantity": 1,
+          "color": "White",
+          "size": "M"
+        }
+      ],
+      "total": 15.6893,
+      "status": "Paid",
+      "date": "2025-02-21T18:56:03.596Z",
+      "customer": {
+        "email": "saiyakkshit2001@gmail.com",
+        "name": "alving",
+        "address": "aohieqnq;e[",
+        "city": "new",
+        "state": "ca",
+        "zipCode": "12345"
+      },
+      "id": "O26443670"
+    }
+  ]
+}

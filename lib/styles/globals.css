@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Override Ant Design Select styles in top banner */
+.ant-select-selection-item {
+  color: white !important;
+}
+
+.ant-select-arrow {
+  color: white !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ant-menu-horizontal {
+    justify-content: flex-start !important;
+  }
+}
+
+/* Custom hover effects */
+.ant-btn-text:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Smooth transitions */
+.ant-drawer-content-wrapper {
+  transition: transform 0.3s ease-in-out !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep functionality */
+.overflow-x-auto {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Override Ant Design Select styles in top banner */
+.ant-select-selection-item {
+  color: white !important;
+}
+
+.ant-select-arrow {
+  color: white !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide:active {
+  cursor: grabbing;
+}
+
+/* Prevent text selection while dragging */
+.scrollbar-hide * {
+  user-select: none;
+}
+
+/* Override Ant Design Select styles in top banner */
+.ant-select-selection-item {
+  color: white !important;
+}
+
+.ant-select-arrow {
+  color: white !important;
+}
+
+/* Card image container */
+.ant-card-cover {
+  background: #fff;
+}

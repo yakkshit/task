@@ -1,57 +1,37 @@
 "use client"
 
-import { Table, Typography, Tag, Button, Card, Space } from "antd"
-import type { ColumnsType } from "antd/es/table"
-import { FileTextOutlined, ShoppingOutlined } from "@ant-design/icons"
-import type { Order } from "@/types/product"
+import { useEffect, useState } from "react"
+import { Layout, Typography, Table, Tag, Button, Spin } from "antd"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/auth-context"
+import { db, type Order, type OrderStatus, type OrderItem } from "@/lib/db"
 
 const { Title, Text } = Typography
 
-interface OrderHistoryProps {
-  orders: Order[]
-}
+export default function AccountPage() {
+  const router = useRouter()
+  const { user } = useAuth()
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<"All" | OrderStatus>("All")
+  const [searchQuery, setSearchQuery] = useState("")
 
-const mockOrders: Order[] = [
-  {
-    id: "WU13433876",
-    items: [
-      {
-        id: 1,
-        title: "Luxury Wool Blend Winter Coat",
-        price: 192.99,
-        quantity: 1,
-        description: "",
-        category: "",
-        image: "",
-        rating: { rate: 0, count: 0 },
-      },
-    ],
-    total: 192.99,
-    date: "2023-01-16",
-    status: "pending",
-  },
-  {
-    id: "WU86634876",
-    items: [
-      {
-        id: 2,
-        title: "Chelsea boots",
-        price: 242.99,
-        quantity: 1,
-        description: "",
-        category: "",
-        image: "",
-        rating: { rate: 0, count: 0 },
-      },
-    ],
-    total: 242.99,
-    date: "2023-01-02",
-    status: "delivered",
-  },
-]
+  useEffect(() => {
+    if (!user) {
+      router.push("/login")
+      return
+    }
 
-export default function OrderHistoryPage() {
-  const columns: ColumnsType<Order> = [
+    const fetchOrders = async () => {
+      const userOrders = await db.getOrdersByUserId(user.id)
+      setOrders(userOrders)
+      setLoading(false)
+    }
+
+    fetchOrders()
+  }, [user, router])
+
+  const columns = [
     {
       title: "Order ID",
       dataIndex: "id",
@@ -63,59 +43,78 @@ export default function OrderHistoryPage() {
       key: "date",
     },
     {
-      title: "Items",
-      key: "items",
-      render: (_, record) => (
-        <>
-          {record.items.map((item) => (
-            <div key={item.id}>
-              {item.title} x {item.quantity}
-            </div>
-          ))}
-        </>
-      ),
-    },
-    {
       title: "Total",
       dataIndex: "total",
       key: "total",
-      render: (total) => `$${total.toFixed(2)}`,
+      render: (total: number) => `$${total.toFixed(2)}`,
     },
     {
       title: "Status",
-      key: "status",
       dataIndex: "status",
-      render: (status) => {
-        const color = status === "delivered" ? "success" : status === "pending" ? "processing" : "error"
-        return <Tag color={color}>{status.toUpperCase()}</Tag>
-      },
+      key: "status",
+      render: (status: string) => <Tag color={status === "Delivered" ? "green" : "blue"}>{status}</Tag>,
     },
     {
       title: "Actions",
       key: "actions",
-      render: () => (
-        <Space>
-          <Button type="text" icon={<FileTextOutlined />}>
-            View Invoice
+      render: (_: any, record: Order) => (
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button size="small" onClick={() => router.push(`/orders/${record.id}`)}>
+            View Order
           </Button>
-          <Button type="text" icon={<ShoppingOutlined />}>
-            Buy Again
-          </Button>
-        </Space>
+          <Button size="small">View Invoice</Button>
+        </div>
       ),
     },
   ]
 
+  if (loading) {
+    return <Spin size="large" />
+  }
+
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: 24 }}>
-      <Card>
-        <Title level={2}>Order History</Title>
-        <Text type="secondary" style={{ display: "block", marginBottom: 24 }}>
-          Keep tabs on the status of your latest orders, effortlessly handle returns, and easily download invoices with
-          just a few clicks.
-        </Text>
-        <Table columns={columns} dataSource={mockOrders} rowKey="id" pagination={{ pageSize: 10 }} />
-      </Card>
-    </div>
+    <Layout style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
+      <Title level={2}>Order History</Title>
+      <p>
+        Keep tabs on the status of your latest orders, effortlessly handle returns, and easily download invoices with
+        just a few clicks.
+      </p>
+
+      <Table
+        dataSource={orders}
+        columns={columns}
+        expandable={{
+          expandedRowRender: (record: Order) => (
+            <Table
+              dataSource={record.items}
+              columns={[
+                {
+                  title: "Product",
+                  dataIndex: "title",
+                  key: "title",
+                },
+                {
+                  title: "Price",
+                  dataIndex: "price",
+                  key: "price",
+                  render: (price: number) => `$${price.toFixed(2)}`,
+                },
+                {
+                  title: "Quantity",
+                  dataIndex: "quantity",
+                  key: "quantity",
+                },
+                {
+                  title: "Total",
+                  key: "total",
+                  render: (_, record: OrderItem) => `$${(record.price * record.quantity).toFixed(2)}`,
+                },
+              ]}
+              pagination={false}
+            />
+          ),
+        }}
+      />
+    </Layout>
   )
 }
