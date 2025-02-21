@@ -52,7 +52,7 @@ class ServerDatabase extends BaseDatabase {
 
   async getOrdersByUserId(userId: string): Promise<Order[]> {
     await this.loadData()
-    return super.getOrdersByUserId(userId)
+    return this.data.orders.filter((order: Order) => order.userId === userId)
   }
 
   async getOrder(id: string): Promise<Order | undefined> {
@@ -63,13 +63,14 @@ class ServerDatabase extends BaseDatabase {
 }
 
 function getDatabase(): BaseDatabase {
-  if (typeof window === "undefined") {
-    return new ServerDatabase()
-  } else {
-    return browserDb
+    if (typeof window === "undefined") {
+      return new ServerDatabase()
+    } else {
+      return browserDb
+    }
   }
-}
-
-export const db = getDatabase()
-
-export type { User, Order, OrderItem, OrderStatus, DatabaseData } from "./base-database"
+  
+  export const db = getDatabase()
+  
+  export type { User, Order, OrderItem, OrderStatus, DatabaseData } from "./base-database"
+  

@@ -1,34 +1,23 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Layout, Typography, Table, Tag, Button, Spin } from "antd"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { db, type Order, type OrderStatus, type OrderItem } from "@/lib/db"
+import { useGetOrdersQuery } from "@/lib/services/orderApi"
+import Link from "next/link"
 
 const { Title, Text } = Typography
 
-export default function AccountPage() {
+export default function OrdersPage() {
   const router = useRouter()
   const { user } = useAuth()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<"All" | OrderStatus>("All")
-  const [searchQuery, setSearchQuery] = useState("")
+  const { data: orders, isLoading, isError } = useGetOrdersQuery(user?.id || "")
 
   useEffect(() => {
     if (!user) {
       router.push("/login")
-      return
     }
-
-    const fetchOrders = async () => {
-      const userOrders = await db.getOrdersByUserId(user.id)
-      setOrders(userOrders)
-      setLoading(false)
-    }
-
-    fetchOrders()
   }, [user, router])
 
   const columns = [
@@ -41,6 +30,7 @@ export default function AccountPage() {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: "Total",
@@ -57,64 +47,40 @@ export default function AccountPage() {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: Order) => (
-        <div style={{ display: "flex", gap: 8 }}>
-          <Button size="small" onClick={() => router.push(`/orders/${record.id}`)}>
-            View Order
-          </Button>
-          <Button size="small">View Invoice</Button>
-        </div>
+      render: (_: any, record: any) => (
+        <Link href={`/orders/${record.id}`}>
+          <Button size="small">View Order</Button>
+        </Link>
       ),
     },
   ]
 
-  if (loading) {
-    return <Spin size="large" />
+  if (!user) {
+    return null
+  }
+
+  if (isLoading) {
+    return (
+      <Layout style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
+        <Spin size="large" />
+      </Layout>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Layout style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
+        <Text type="danger">Error loading orders. Please try again later.</Text>
+      </Layout>
+    )
   }
 
   return (
     <Layout style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
       <Title level={2}>Order History</Title>
-      <p>
-        Keep tabs on the status of your latest orders, effortlessly handle returns, and easily download invoices with
-        just a few clicks.
-      </p>
+      <Text style={{ marginBottom: 24, display: "block" }}>View and manage your recent orders.</Text>
 
-      <Table
-        dataSource={orders}
-        columns={columns}
-        expandable={{
-          expandedRowRender: (record: Order) => (
-            <Table
-              dataSource={record.items}
-              columns={[
-                {
-                  title: "Product",
-                  dataIndex: "title",
-                  key: "title",
-                },
-                {
-                  title: "Price",
-                  dataIndex: "price",
-                  key: "price",
-                  render: (price: number) => `$${price.toFixed(2)}`,
-                },
-                {
-                  title: "Quantity",
-                  dataIndex: "quantity",
-                  key: "quantity",
-                },
-                {
-                  title: "Total",
-                  key: "total",
-                  render: (_, record: OrderItem) => `$${(record.price * record.quantity).toFixed(2)}`,
-                },
-              ]}
-              pagination={false}
-            />
-          ),
-        }}
-      />
+      <Table dataSource={orders} columns={columns} rowKey="id" />
     </Layout>
   )
 }
