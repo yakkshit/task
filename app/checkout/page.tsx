@@ -60,8 +60,7 @@ export default function CheckoutPage() {
       dispatch(clearCart())
       router.push(`/checkout/confirmation?orderId=${result.id}`)
     } catch (error) {
-      console.error("Failed to create order:", error)
-      showNotification("error", "Failed to create order")
+      showNotification("error", "Failed to create order. Please try again.")
     }
   }
 

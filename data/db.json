@@ -2,30 +2,56 @@
   "users": [],
   "orders": [
     {
-      "userId": "U78335721",
+      "userId": "U11528343",
       "items": [
         {
-          "id": 7,
-          "title": "White Gold Plated Princess",
-          "price": 9.99,
-          "image": "https://fakestoreapi.com/img/71YAIFU48IL._AC_UL640_QL65_ML3_.jpg",
+          "id": 17,
+          "title": "Rain Jacket Women Windbreaker Striped Climbing Raincoats",
+          "price": 39.99,
+          "image": "https://fakestoreapi.com/img/71HblAHs5xL._AC_UY879_-2.jpg",
           "quantity": 1,
           "color": "White",
           "size": "M"
         }
       ],
-      "total": 15.6893,
+      "total": 47.789300000000004,
       "status": "Paid",
-      "date": "2025-02-21T18:56:03.596Z",
+      "date": "2025-02-21T19:20:38.236Z",
+      "customer": {
+        "email": "saiyakkshti2001@gmail.com",
+        "name": "qwerty",
+        "address": "qwerty",
+        "city": "qwerty",
+        "state": "qwerty",
+        "zipCode": "123456"
+      },
+      "id": "O35827418"
+    },
+    {
+      "userId": "U37214109",
+      "items": [
+        {
+          "id": 17,
+          "title": "Rain Jacket Women Windbreaker Striped Climbing Raincoats",
+          "price": 39.99,
+          "image": "https://fakestoreapi.com/img/71HblAHs5xL._AC_UY879_-2.jpg",
+          "quantity": 1,
+          "color": "White",
+          "size": "M"
+        }
+      ],
+      "total": 47.789300000000004,
+      "status": "Paid",
+      "date": "2025-02-21T19:27:51.733Z",
       "customer": {
         "email": "saiyakkshit2001@gmail.com",
-        "name": "alving",
-        "address": "aohieqnq;e[",
-        "city": "new",
-        "state": "ca",
+        "name": "sai",
+        "address": "sai",
+        "city": "sai",
+        "state": "sai",
         "zipCode": "12345"
       },
-      "id": "O26443670"
+      "id": "O44416198"
     }
   ]
 }
