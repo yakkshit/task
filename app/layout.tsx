@@ -47,7 +47,7 @@ export default function RootLayout({
               <AuthProvider>
                 <ClientErrorBoundary>
                   <Navbar />
-                  {children}
+                   {children}
                   <Footer />
                 </ClientErrorBoundary>
               </AuthProvider>
