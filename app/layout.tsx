@@ -8,7 +8,7 @@ import { Providers } from "@/lib/providers";
 import Navbar from "@/components/navbar";
 import ClientErrorBoundary from "@/components/ClientErrorBoundary";
 import { AuthProvider } from "@/lib/hooks/useAuth";
-import Footer from "@/components/Footer";
+import Footer from "../components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
