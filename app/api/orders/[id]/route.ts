@@ -8,7 +8,7 @@ interface Order {
   [key: string]: any
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: { [key: string]: string } }) {
   try {
     const orders = (cache.get("orders") as Order[]) || []
     const order = orders.find((o: Order) => o.id === params.id)
@@ -42,7 +42,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, { params }: { params: { [key: string]: string } }) {
   try {
     const orders = (cache.get("orders") as Order[]) || []
     const updatedOrders = orders.filter((o: Order) => o.id !== params.id)
