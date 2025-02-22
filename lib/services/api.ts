@@ -1,63 +1,23 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-
-export interface Product {
-  id: number
-  title: string
-  price: number
-  category: string
-  image: string
-  description: string
-}
-
-interface CartItem {
-  id: number
-  title: string
-  price: number
-  image: string
-  quantity: number
-  color: string
-  size: string
-}
+import type { Product } from "../types"
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: "https://fakestoreapi.com",
-    prepareHeaders: (headers) => {
-      headers.set("X-Auth-Key", process.env.NEXT_PUBLIC_API_AUTH_KEY || "")
-      return headers
-    },
-  }),
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({ baseUrl: "https://fakestoreapi.com" }),
+  tagTypes: ["Products", "Cart", "Orders"],
   endpoints: (builder) => ({
     getProducts: builder.query<Product[], void>({
-      query: () => `/products`,
+      query: () => "products",
+      providesTags: ["Products"],
     }),
     getProduct: builder.query<Product, number>({
-      query: (id) => `/products/${id}`,
-    }),
-    getCategories: builder.query<string[], void>({
-      query: () => "/products/categories",
+      query: (id) => `products/${id}`,
     }),
     getProductsByCategory: builder.query<Product[], string>({
-      query: (category) => `/products/category/${category}`,
-    }),
-    getCart: builder.query<CartItem[], void>({
-      query: () => "/cart",
-    }),
-    updateCart: builder.mutation<CartItem[], CartItem[]>({
-      query: (items) => ({
-        url: "/cart",
-        method: "POST",
-        body: { items },
-      }),
+      query: (category) => `products/category/${category}`,
     }),
   }),
 })
 
-export const {
-  useGetProductsQuery,
-  useGetProductQuery,
-  useGetCategoriesQuery,
-  useGetProductsByCategoryQuery,
-  useGetCartQuery,
-  useUpdateCartMutation,
-} = api
+export const { useGetProductsQuery, useGetProductQuery, useGetProductsByCategoryQuery } = api
+

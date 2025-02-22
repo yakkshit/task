@@ -1,162 +1,178 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Layout, Row, Col, Card, Checkbox, Slider, Radio, Typography, Button, Select, Spin } from "antd"
-import { useGetProductsQuery, useGetCategoriesQuery } from "@/lib/services/api"
+import { useState } from "react"
+import { Layout, Row, Col, Card, Input, Slider, Checkbox, Radio, Button, Typography, Spin } from "antd"
+import { useGetProductsQuery } from "@/lib/services/api"
+import Image from "next/image"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 
 const { Title, Text } = Typography
-
-const ITEMS_PER_PAGE = 8
+const { Search } = Input
 
 export default function ProductsPage() {
-  const searchParams = useSearchParams()
-  const initialCategory = searchParams?.get("category") ?? null
+  const [priceRange, setPriceRange] = useState([0, 1000])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedColors, setSelectedColors] = useState<string[]>([])
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const [filters, setFilters] = useState({
-    category: initialCategory ? [initialCategory] : [],
-    price: [0, 1000] as [number, number],
-    color: [] as string[],
+  const { data: products, isLoading } = useGetProductsQuery()
+
+  const filteredProducts = products?.filter((product) => {
+    const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1]
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category)
+    return matchesSearch && matchesPrice && matchesCategory
   })
-  const [sort, setSort] = useState("desc")
-  const [page, setPage] = useState(1)
-
-  const { data: products = [], isLoading } = useGetProductsQuery()
-  const { data: categories = [] } = useGetCategoriesQuery()
-
-  const filteredProducts = products.filter((product: any) => {
-    if (filters.category.length && !filters.category.includes(product.category)) return false
-    if (product.price < filters.price[0] || product.price > filters.price[1]) return false
-    return true
-  })
-
-  const sortedProducts = [...filteredProducts].sort((a: any, b: any) => {
-    switch (sort) {
-      case "price-high":
-        return b.price - a.price
-      case "price-low":
-        return a.price - b.price
-      case "asc":
-        return a.title.localeCompare(b.title)
-      default:
-        return b.title.localeCompare(a.title)
-    }
-  })
-
-  const displayedProducts = sortedProducts.slice(0, page * ITEMS_PER_PAGE)
-  const hasMore = displayedProducts.length < sortedProducts.length
-
-  const handleLoadMore = () => {
-    setPage((prev) => prev + 1)
-  }
-
-  useEffect(() => {
-    setPage(1)
-  }, [filters, sort])
 
   return (
-    <Layout style={{ padding: "24px", maxWidth: 1400, margin: "0 auto" }}>
-      <Row gutter={[24, 24]}>
-        <Col xs={24} md={6}>
-          <Card>
-            <Title level={5}>Category</Title>
-            <Checkbox.Group
-              options={categories}
-              value={filters.category}
-              onChange={(values) => setFilters({ ...filters, category: values as string[] })}
-            />
+    <Layout className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Row gutter={[32, 32]}>
+          {/* Filters Sidebar */}
+          <Col xs={24} lg={6}>
+            <Card className="sticky top-4">
+              <div className="space-y-6">
+                <div>
+                  <Title level={5}>Search</Title>
+                  <Search
+                    placeholder="Search products..."
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="mb-4"
+                  />
+                </div>
 
-            <Title level={5} style={{ marginTop: 24 }}>
-              Price Range
-            </Title>
-            <Slider
-              range
-              min={0}
-              max={1000}
-              value={filters.price}
-              onChange={(value) => setFilters({ ...filters, price: value as [number, number] })}
-            />
+                <div>
+                  <Title level={5}>Category</Title>
+                  <Checkbox.Group
+                    options={[
+                      { label: "New collection", value: "new" },
+                      { label: "Popular", value: "popular" },
+                      { label: "Summer 2023", value: "summer" },
+                    ]}
+                    value={selectedCategories}
+                    onChange={(values) => setSelectedCategories(values as string[])}
+                  />
+                </div>
 
-            <Title level={5} style={{ marginTop: 24 }}>
-              Color
-            </Title>
-            <Radio.Group onChange={(e) => setFilters({ ...filters, color: [e.target.value] })}>
-              <Radio value="white">White</Radio>
-              <Radio value="black">Black</Radio>
-              <Radio value="blue">Blue</Radio>
-              <Radio value="red">Red</Radio>
-            </Radio.Group>
-          </Card>
-        </Col>
+                <div>
+                  <Title level={5}>Price Range</Title>
+                  <Slider
+                    range
+                    min={0}
+                    max={1000}
+                    value={priceRange}
+                    onChange={(value) => setPriceRange(value as [number, number])}
+                  />
+                  <div className="flex justify-between">
+                    <Text>${priceRange[0]}</Text>
+                    <Text>${priceRange[1]}</Text>
+                  </div>
+                </div>
 
-        <Col xs={24} md={18}>
-          <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-            <Title level={4} style={{ margin: 0 }}>
-              Products ({filteredProducts.length})
-            </Title>
-            <Select
-              defaultValue="desc"
-              style={{ width: 200 }}
-              onChange={setSort}
-              options={[
-                { value: "desc", label: "Newest First" },
-                { value: "asc", label: "Oldest First" },
-                { value: "price-high", label: "Price: High to Low" },
-                { value: "price-low", label: "Price: Low to High" },
-              ]}
-            />
-          </Row>
+                <div>
+                  <Title level={5}>Color</Title>
+                  <Checkbox.Group
+                    options={[
+                      { label: "White", value: "white" },
+                      { label: "Black", value: "black" },
+                      { label: "Blue", value: "blue" },
+                      { label: "Red", value: "red" },
+                    ]}
+                    value={selectedColors}
+                    onChange={(values) => setSelectedColors(values as string[])}
+                  />
+                </div>
 
-          <Row gutter={[16, 16]}>
+                <div>
+                  <Title level={5}>Size</Title>
+                  <Radio.Group value={selectedSizes} onChange={(e) => setSelectedSizes([e.target.value])}>
+                    <div className="space-y-2">
+                      {["XS", "S", "M", "L", "XL"].map((size) => (
+                        <Radio key={size} value={size}>
+                          {size}
+                        </Radio>
+                      ))}
+                    </div>
+                  </Radio.Group>
+                </div>
+
+                <Button type="primary" block>
+                  Apply Filters
+                </Button>
+              </div>
+            </Card>
+          </Col>
+
+          {/* Products Grid */}
+          <Col xs={24} lg={18}>
             {isLoading ? (
-              <div className="w-full flex justify-center p-8">
+              <div className="flex justify-center items-center h-96">
                 <Spin size="large" />
               </div>
-            ) : displayedProducts.length === 0 ? (
-              <div className="w-full text-center p-8">
-                <Text>No products found matching your criteria.</Text>
-              </div>
             ) : (
-              displayedProducts.map((product: any) => (
-                <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
-                  <Link href={`/products/${product.id}`}>
-                    <Card
-                      hoverable
-                      cover={
-                        <img
-                          alt={product.title}
-                          src={product.image || "/placeholder.svg"}
-                          style={{ height: 200, objectFit: "contain", padding: 16 }}
-                        />
-                      }
-                    >
-                      <Card.Meta
-                        title={product.title}
-                        description={
-                          <>
-                            <Text strong>${product.price.toFixed(2)}</Text>
-                            <br />
-                            <Text type="secondary">{product.category}</Text>
-                          </>
-                        }
-                      />
-                    </Card>
-                  </Link>
-                </Col>
-              ))
-            )}
-          </Row>
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <Title level={4}>Products ({filteredProducts?.length || 0})</Title>
+                  <Radio.Group defaultValue="grid">
+                    <Radio.Button value="grid">Grid</Radio.Button>
+                    <Radio.Button value="list">List</Radio.Button>
+                  </Radio.Group>
+                </div>
 
-          {hasMore && (
-            <Row justify="center" style={{ marginTop: 24 }}>
-              <Button type="primary" onClick={handleLoadMore}>
-                Load More
-              </Button>
-            </Row>
-          )}
-        </Col>
-      </Row>
+                <Row gutter={[16, 16]}>
+                  {filteredProducts?.map((product) => (
+                    <Col xs={24} sm={12} md={8} key={product.id}>
+                      <Link href={`/products/${product.id}`}>
+                        <Card
+                          hoverable
+                          cover={
+                            <div className="relative h-[300px]">
+                              <Image
+                                src={product.image || "/placeholder.svg"}
+                                alt={product.title}
+                                fill
+                                className="object-contain p-4"
+                              />
+                            </div>
+                          }
+                        >
+                          <Card.Meta
+                            title={product.title}
+                            description={
+                              <div>
+                                <Text className="text-lg font-semibold block">${product.price.toFixed(2)}</Text>
+                                <div className="flex items-center mt-2">
+                                  <div className="flex">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <span
+                                        key={i}
+                                        className={`text-lg ${
+                                          i < Math.floor(product.rating.rate) ? "text-yellow-400" : "text-gray-300"
+                                        }`}
+                                      >
+                                        ★
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <Text type="secondary" className="ml-2">
+                                    ({product.rating.count})
+                                  </Text>
+                                </div>
+                              </div>
+                            }
+                          />
+                        </Card>
+                      </Link>
+                    </Col>
+                  ))}
+                </Row>
+              </div>
+            )}
+          </Col>
+        </Row>
+      </div>
     </Layout>
   )
 }
+
