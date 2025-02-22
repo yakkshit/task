@@ -1,17 +1,28 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import NodeCache from "node-cache"
 
 const cache = new NodeCache({ stdTTL: 600 }) // Cache expires in 10 minutes
+
+const AUTH_KEY = process.env.API_AUTH_KEY || "qwerty123"
 
 interface Order {
   id: string
   [key: string]: any
 }
 
-export async function GET(_request: Request, { params }: { params: { [key: string]: string } }) {
+function isAuthorized(req: NextRequest): boolean {
+  return req.headers.get("Authorization") === AUTH_KEY
+}
+
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
+    const { id } = context.params
     const orders = (cache.get("orders") as Order[]) || []
-    const order = orders.find((o: Order) => o.id === params.id)
+    const order = orders.find((o: Order) => o.id === id)
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 })
@@ -23,11 +34,16 @@ export async function GET(_request: Request, { params }: { params: { [key: strin
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
-    const body = await request.json()
+    const { id } = context.params
+    const body = await req.json()
     const orders = (cache.get("orders") as Order[]) || []
-    const orderIndex = orders.findIndex((o: Order) => o.id === params.id)
+    const orderIndex = orders.findIndex((o: Order) => o.id === id)
 
     if (orderIndex === -1) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 })
@@ -42,10 +58,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: { [key: string]: string } }) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
+    const { id } = context.params
     const orders = (cache.get("orders") as Order[]) || []
-    const updatedOrders = orders.filter((o: Order) => o.id !== params.id)
+    const updatedOrders = orders.filter((o: Order) => o.id !== id)
 
     if (updatedOrders.length === orders.length) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 })
