@@ -1,118 +1,110 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Layout, Typography, Tabs, Input, Table, Tag, Button, Spin } from "antd"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
-import { db } from "@/lib/db"
-import type { Order } from "@/lib/base-database"
-import { SearchOutlined } from "@ant-design/icons"
-import Link from "next/link"
+import { useState } from "react"
+import { Card, Tabs, Typography, Button, Form, Input, message } from "antd"
+import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons"
 
-const { Title, Text } = Typography
+const { Title } = Typography
+const { TabPane } = Tabs
 
 export default function AccountPage() {
-  const router = useRouter()
-  const { user } = useAuth()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<"All" | Order["status"]>("All")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState("1")
 
-  useEffect(() => {
-    if (!user) {
-      router.push("/login")
-      return
-    }
+  const onFinish = (values: any) => {
+    console.log("Success:", values)
+    message.success("Profile updated successfully")
+  }
 
-    const fetchOrders = async () => {
-      try {
-        const userOrders = await db.getOrdersByUserId(user.id)
-        setOrders(userOrders)
-      } catch (error) {
-        console.error("Error fetching orders:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchOrders()
-  }, [user, router])
-
-  const filteredOrders = orders.filter((order) => {
-    const matchesFilter = filter === "All" || order.status === filter
-    const matchesSearch = order.items.some((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
-    return matchesFilter && matchesSearch
-  })
-
-  const columns = [
-    {
-      title: "Order ID",
-      dataIndex: "id",
-      key: "id",
-    },
-    {
-      title: "Date",
-      dataIndex: "date",
-      key: "date",
-      render: (date: string) => new Date(date).toLocaleDateString(),
-    },
-    {
-      title: "Total",
-      dataIndex: "total",
-      key: "total",
-      render: (total: number) => `$${total.toFixed(2)}`,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: Order["status"]) => <Tag color={status === "Delivered" ? "green" : "blue"}>{status}</Tag>,
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_: any, record: Order) => (
-        <Link href={`/orders/${record.id}`}>
-          <Button size="small">View Order</Button>
-        </Link>
-      ),
-    },
-  ]
-
-  if (loading) {
-    return (
-      <Layout style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
-        <Spin size="large" />
-      </Layout>
-    )
+  const onFinishFailed = (errorInfo: any) => {
+    console.log("Failed:", errorInfo)
   }
 
   return (
-    <Layout style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
-      <Title level={2}>Order History</Title>
-      <Text style={{ marginBottom: 24, display: "block" }}>View and manage your recent orders.</Text>
-
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
-        <Tabs
-          activeKey={filter}
-          onChange={(key) => setFilter(key as "All" | Order["status"])}
-          items={[
-            { key: "All", label: "All" },
-            { key: "Paid", label: "Paid" },
-            { key: "Delivered", label: "Delivered" },
-            { key: "Cancelled", label: "Cancelled" },
-          ]}
-        />
-        <Input
-          placeholder="Search orders"
-          prefix={<SearchOutlined />}
-          style={{ width: 200 }}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      <Table dataSource={filteredOrders} columns={columns} rowKey="id" pagination={{ pageSize: 10 }} />
-    </Layout>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <Title level={2}>My Account</Title>
+      <Card>
+        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <TabPane tab="Profile" key="1">
+            <Form
+              name="profile"
+              initialValues={{ remember: true }}
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              layout="vertical"
+            >
+              <Form.Item name="name" label="Full Name" rules={[{ required: true, message: "Please input your name!" }]}>
+                <Input prefix={<UserOutlined />} placeholder="Full Name" />
+              </Form.Item>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { required: true, message: "Please input your email!" },
+                  { type: "email", message: "Please enter a valid email!" },
+                ]}
+              >
+                <Input prefix={<MailOutlined />} placeholder="Email" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Update Profile
+                </Button>
+              </Form.Item>
+            </Form>
+          </TabPane>
+          <TabPane tab="Change Password" key="2">
+            <Form
+              name="changePassword"
+              initialValues={{ remember: true }}
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              layout="vertical"
+            >
+              <Form.Item
+                name="currentPassword"
+                label="Current Password"
+                rules={[{ required: true, message: "Please input your current password!" }]}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder="Current Password" />
+              </Form.Item>
+              <Form.Item
+                name="newPassword"
+                label="New Password"
+                rules={[
+                  { required: true, message: "Please input your new password!" },
+                  { min: 8, message: "Password must be at least 8 characters long" },
+                ]}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder="New Password" />
+              </Form.Item>
+              <Form.Item
+                name="confirmPassword"
+                label="Confirm New Password"
+                dependencies={["newPassword"]}
+                rules={[
+                  { required: true, message: "Please confirm your new password!" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("newPassword") === value) {
+                        return Promise.resolve()
+                      }
+                      return Promise.reject(new Error("The two passwords do not match!"))
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder="Confirm New Password" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Change Password
+                </Button>
+              </Form.Item>
+            </Form>
+          </TabPane>
+        </Tabs>
+      </Card>
+    </div>
   )
 }
+

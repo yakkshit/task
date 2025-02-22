@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Layout,
   Row,
@@ -16,14 +16,14 @@ import {
   Avatar,
   Divider,
   Spin,
+  App,
 } from "antd"
 import { HeartOutlined, ShoppingCartOutlined } from "@ant-design/icons"
 import { useGetProductQuery, useGetProductsByCategoryQuery } from "@/lib/services/api"
-import { useRouter } from "next/navigation"
 import { useDispatch } from "react-redux"
-import { addToCart } from "@/lib/features/cartSlice"
-import { showNotification } from "./Notification"
+import { addToCart, fetchCart } from "@/lib/features/cartSlice"
 import Link from "next/link"
+import type { AppDispatch } from "@/lib/store"
 
 const { Title, Text, Paragraph } = Typography
 
@@ -53,7 +53,6 @@ const reviews = [
     content:
       "Maecenas sit amet urna ut libero tincidunt consectetur. Nullam commodo sapien nec sem congue, in efficitur ligula vestibulum. Proin dictum eros eu pulvinar tempus.",
   },
-  // Add more reviews as needed
 ]
 
 const features = [
@@ -71,9 +70,9 @@ interface ProductPageContentProps {
 }
 
 export default function ProductPageContent({ id }: ProductPageContentProps) {
-  const router = useRouter()
-  const dispatch = useDispatch()
-  const { data: product, isLoading } = useGetProductQuery(Number(id))
+  const { notification } = App.useApp()
+  const dispatch = useDispatch<AppDispatch>()
+  const { data: product, isLoading, error } = useGetProductQuery(Number(id))
   const { data: similarProducts, isLoading: isSimilarProductsLoading } = useGetProductsByCategoryQuery(
     product?.category || "",
   )
@@ -81,22 +80,57 @@ export default function ProductPageContent({ id }: ProductPageContentProps) {
   const [selectedSize, setSelectedSize] = useState("M")
   const [quantity, setQuantity] = useState(1)
 
-  if (isLoading) return <div>Loading...</div>
-  if (!product) return <div>Product not found</div>
+  useEffect(() => {
+    dispatch(fetchCart())
+  }, [dispatch])
 
-  const handleAddToCart = () => {
-    dispatch(
-      addToCart({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        image: product.image,
-        quantity,
-        color: selectedColor,
-        size: selectedSize,
-      }),
+  if (isLoading) {
+    return (
+      <Layout style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Spin size="large" />
+      </Layout>
     )
-    showNotification("success", "Product added to cart")
+  }
+
+  if (error) {
+    return (
+      <Layout style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Title level={3}>Error loading product. Please try again later.</Title>
+      </Layout>
+    )
+  }
+
+  if (!product) {
+    return (
+      <Layout style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Title level={3}>Product not found.</Title>
+      </Layout>
+    )
+  }
+
+  const handleAddToCart = async () => {
+    const item = {
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.image,
+      quantity,
+      color: selectedColor,
+      size: selectedSize,
+    }
+
+    try {
+      await dispatch(addToCart(item)).unwrap()
+      notification.success({
+        message: "Added to Cart",
+        description: `${quantity} ${quantity > 1 ? "items" : "item"} added to your cart.`,
+      })
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Failed to add item to cart. Please try again.",
+      })
+    }
   }
 
   // Calculate average rating and rating distribution

@@ -1,217 +1,182 @@
 "use client"
 
-import type React from "react"
-
-import { Layout, Button, Row, Col, Card, Typography, Image } from "antd"
-import { useGetProductsQuery } from "@/lib/services/api"
+import { useEffect, useState } from "react"
+import { Typography, Button, Card, Row, Col } from "antd"
 import Link from "next/link"
-import { ArrowRightOutlined } from "@ant-design/icons"
-import { useRef, useState } from "react"
+import Image from "next/image"
+import { ArrowRightOutlined, GiftOutlined, TagOutlined, UndoOutlined } from "@ant-design/icons"
 
 const { Title, Text } = Typography
 
-// Sample product images for hero and collections
-const sampleImages = [
-  "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg",
-  "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_.jpg",
-  "https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_.jpg",
-]
+interface Product {
+  id: number
+  title: string
+  price: number
+  description: string
+  category: string
+  image: string
+}
 
-const collections = [
-  {
-    title: "Adventure Seeker Collection",
-    category: "Adventure",
-    image: "https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_.jpg",
-  },
-  {
-    title: "Street Travel Collection",
-    category: "Travel",
-    image: "https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_.jpg",
-  },
-  {
-    title: "Everyday Essentials Collection",
-    category: "Daily use items",
-    image: "https://fakestoreapi.com/img/51Y5NI-I5jL._AC_UX679_.jpg",
-  },
-]
-
-const promotions = [
-  {
-    title: "Exclusive Offer",
-    description: "Save 5% with Code 'NEW5'",
-  },
-  {
-    title: "New Value",
-    description: "Enjoy 15% Off Your Next Beauty Purchase!",
-  },
-  {
-    title: "Hassle-Free Shopping",
-    description: "Enjoy 60 Days of Free Returns",
-  },
-]
+async function getProducts() {
+  const res = await fetch("https://fakestoreapi.com/products?limit=8")
+  if (!res.ok) {
+    throw new Error("Failed to fetch products")
+  }
+  return res.json()
+}
 
 export default function Home() {
-  const { data: products = [], isLoading } = useGetProductsQuery()
-  const scrollContainerRef1 = useRef<HTMLDivElement>(null)
-  const scrollContainerRef2 = useRef<HTMLDivElement>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const [scrollLeft, setScrollLeft] = useState(0)
+  const [products, setProducts] = useState<Product[]>([])
 
-  const handleMouseDown = (e: React.MouseEvent, ref: React.RefObject<HTMLDivElement | null>) => {
-    if (!ref.current) return
-    setIsDragging(true)
-    setStartX(e.pageX - ref.current.offsetLeft)
-    setScrollLeft(ref.current.scrollLeft)
-  }
-
-  const handleMouseMove = (e: React.MouseEvent, ref: React.RefObject<HTMLDivElement | null>) => {
-    if (!isDragging || !ref.current) return
-    e.preventDefault()
-    const x = e.pageX - ref.current.offsetLeft
-    const walk = (x - startX) * 2
-    ref.current.scrollLeft = scrollLeft - walk
-  }
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
+  useEffect(() => {
+    getProducts().then(setProducts)
+  }, [])
 
   return (
-    <Layout>
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gray-100 overflow-hidden">
-        <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-8 px-4 py-12">
-          <div className="flex flex-col justify-center">
-            <Title level={1} className="text-4xl md:text-5xl mb-4">
-              Explore Fresh Cosmetic Arrivals!
-            </Title>
-            <Text className="text-lg mb-8">
-              Experience Beauty's Newest Delights: Discover Fresh Makeup, Skincare, and Beauty Products to Elevate Your
-              Routine!
-            </Text>
-            <Button type="primary" size="large" className="w-fit">
-              Shop now
-            </Button>
-          </div>
-          <div className="flex items-center justify-center">
-            <Image
-              src={sampleImages[0] || "/placeholder.svg"}
-              alt="Featured collection"
-              width={400}
-              height={400}
-              className="object-contain rounded-lg"
-            />
+      <div className="relative h-[500px] bg-gradient-to-r from-gray-100 to-gray-200">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <Title level={1} className="text-4xl md:text-5xl font-bold mb-4">
+                Explore Fresh Cosmetic Arrivals!
+              </Title>
+              <Text className="text-gray-600 text-lg block mb-6">
+                Experience beauty's newest delights. Discover Fresh Makeup, Skincare, and Beauty Products to Elevate
+                Your Routine!
+              </Text>
+              <Link href="/products">
+                <Button type="primary" size="large" className="h-12 px-8">
+                  Shop now <ArrowRightOutlined />
+                </Button>
+              </Link>
+            </div>
+            <div className="hidden md:flex justify-center items-center">
+              <Image
+                src={products[0]?.image || "/placeholder.svg"}
+                alt="Featured Product"
+                width={400}
+                height={400}
+                className="object-contain"
+              />
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Promotions */}
-      <section className="py-8 px-4">
-        <div className="max-w-[1200px] mx-auto">
-          <Row gutter={[16, 16]} justify="center">
-            {promotions.map((promo, index) => (
-              <Col xs={24} sm={8} key={index}>
-                <Card className="text-center h-full">
-                  <Title level={5}>{promo.title}</Title>
-                  <Text>{promo.description}</Text>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </div>
-      </section>
+      <div className="max-w-7xl mx-auto py-12 px-4">
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}>
+            <Card className="text-center h-full bg-blue-50 border-0">
+              <TagOutlined className="text-3xl text-blue-600 mb-4" />
+              <Title level={5}>Exclusive Offer</Title>
+              <Text className="block">Save 5% with Code 'NEW5'</Text>
+            </Card>
+          </Col>
+          <Col xs={24} md={8}>
+            <Card className="text-center h-full bg-pink-50 border-0">
+              <GiftOutlined className="text-3xl text-pink-600 mb-4" />
+              <Title level={5}>Special Deal</Title>
+              <Text className="block">Enjoy 15% Off Your Next Beauty Purchase!</Text>
+            </Card>
+          </Col>
+          <Col xs={24} md={8}>
+            <Card className="text-center h-full bg-green-50 border-0">
+              <UndoOutlined className="text-3xl text-green-600 mb-4" />
+              <Title level={5}>Free Returns</Title>
+              <Text className="block">Enjoy 60 Days of Free Returns</Text>
+            </Card>
+          </Col>
+        </Row>
+      </div>
 
       {/* Collections */}
-      <section className="py-8 px-4">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <Title level={2}>Collections</Title>
-          </div>
-          <Row gutter={[16, 16]}>
-            {collections.map((collection, index) => (
-              <Col xs={24} sm={12} md={8} key={index}>
-                <Link href={`/products?collection=${collection.category.toLowerCase()}`}>
+      <div className="bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <Title level={2} className="mb-8">
+            Collections
+          </Title>
+          <Row gutter={[24, 24]}>
+            {products.slice(0, 3).map((product, index) => (
+              <Col xs={24} md={8} key={product.id}>
+                <Link href={`/category/${product.category}`}>
                   <Card
                     hoverable
                     cover={
-                      <img
-                        alt={collection.title}
-                        src={collection.image || "/placeholder.svg"}
-                        style={{ height: 300, objectFit: "cover" }}
-                      />
+                      <div className="h-[300px] relative">
+                        <Image
+                          src={product.image || "/placeholder.svg"}
+                          alt={product.title}
+                          fill
+                          className="object-contain p-4"
+                        />
+                      </div>
                     }
                   >
-                    <Text type="secondary" className="uppercase">
-                      {collection.category}
-                    </Text>
-                    <Title level={4}>{collection.title}</Title>
+                    <Card.Meta
+                      title={
+                        <Title level={5} className="m-0">
+                          {index === 0
+                            ? "Adventure Seeker Collection"
+                            : index === 1
+                              ? "Street Travel Collection"
+                              : "Everyday Essentials Collection"}
+                        </Title>
+                      }
+                      description={`Explore ${product.category}`}
+                    />
                   </Card>
                 </Link>
               </Col>
             ))}
           </Row>
         </div>
-      </section>
+      </div>
 
-      {/* Similar Products Scrollable Section */}
-      <section className="py-8 px-4">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <Title level={2}>Similar Products</Title>
-            <Link href="/products">
-              <Button type="link" className="flex items-center">
-                See everything <ArrowRightOutlined className="ml-2" />
-              </Button>
-            </Link>
-          </div>
-          <div
-            className="overflow-x-auto scrollbar-hide"
-            ref={scrollContainerRef1}
-            onMouseDown={(e) => handleMouseDown(e, scrollContainerRef1)}
-            onMouseMove={(e) => handleMouseMove(e, scrollContainerRef1)}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            <div className="flex gap-4 pb-4" style={{ minWidth: "min-content" }}>
-              {products.slice(0, 6).map((product: any) => (
-                <div key={product.id} style={{ minWidth: "280px", maxWidth: "280px" }}>
-                  <Link href={`/products/${product.id}`}>
-                    <Card
-                      hoverable
-                      cover={
-                        <div className="h-[200px] flex items-center justify-center p-4">
-                          <img
-                            alt={product.title}
-                            src={product.image || "/placeholder.svg"}
-                            className="max-h-full w-auto object-contain"
-                          />
+      {/* Featured Products */}
+      <div className="bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <Title level={2} className="mb-8">
+            Similar Products
+          </Title>
+          <Row gutter={[16, 16]}>
+            {products.slice(0, 4).map((product) => (
+              <Col xs={24} sm={12} md={6} key={product.id}>
+                <Link href={`/products/${product.id}`}>
+                  <Card
+                    hoverable
+                    cover={
+                      <div className="h-[200px] relative">
+                        <Image
+                          src={product.image || "/placeholder.svg"}
+                          alt={product.title}
+                          fill
+                          className="object-contain p-4"
+                        />
+                      </div>
+                    }
+                  >
+                    <Card.Meta
+                      title={product.title}
+                      description={
+                        <div className="mt-2">
+                          <Text className="text-lg font-semibold block">${product.price.toFixed(2)}</Text>
                         </div>
                       }
-                    >
-                      <Card.Meta
-                        title={product.title}
-                        description={
-                          <div>
-                            <Text strong>${product.price.toFixed(2)}</Text>
-                            <Text delete type="secondary" className="ml-2">
-                              ${(product.price * 1.2).toFixed(2)}
-                            </Text>
-                          </div>
-                        }
-                      />
-                    </Card>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
+                    />
+                  </Card>
+                </Link>
+              </Col>
+            ))}
+          </Row>
         </div>
-      </section>
+      </div>
 
-      {/* Bottom CTA Section */}
-      <section className="bg-gray-900 text-white py-16 px-4">
-        <div className="max-w-[1200px] mx-auto text-center">
+      {/* Dark Theme Promotion */}
+      <div className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
           <Title level={2} className="text-white mb-4">
             Explore Our Newest Cosmetic Arrivals!
           </Title>
@@ -219,66 +184,52 @@ export default function Home() {
             Our latest cosmetic arrivals have just landed, and they're sure to dazzle you. Check out the freshest
             makeup, skincare, beauty products and elevate your beauty routine.
           </Text>
-          <Button type="primary" size="large">
-            Shop Now
-          </Button>
+          <Link href="/products">
+            <Button type="primary" size="large" className="h-12 px-8">
+              Shop Now
+            </Button>
+          </Link>
         </div>
-      </section>
+      </div>
 
-      {/* Second Similar Products Section */}
-      <section className="py-8 px-4">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <Title level={2}>Similar Products</Title>
-            <Link href="/products">
-              <Button type="link" className="flex items-center">
-                See everything <ArrowRightOutlined className="ml-2" />
-              </Button>
-            </Link>
-          </div>
-          <div
-            className="overflow-x-auto scrollbar-hide"
-            ref={scrollContainerRef2}
-            onMouseDown={(e) => handleMouseDown(e, scrollContainerRef2)}
-            onMouseMove={(e) => handleMouseMove(e, scrollContainerRef2)}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            <div className="flex gap-4 pb-4" style={{ minWidth: "min-content" }}>
-              {products.slice(6, 12).map((product: any) => (
-                <div key={product.id} style={{ minWidth: "280px", maxWidth: "280px" }}>
-                  <Link href={`/products/${product.id}`}>
-                    <Card
-                      hoverable
-                      cover={
-                        <div className="h-[200px] flex items-center justify-center p-4">
-                          <img
-                            alt={product.title}
-                            src={product.image || "/placeholder.svg"}
-                            className="max-h-full w-auto object-contain"
-                          />
+      {/* More Products */}
+      <div className="bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <Title level={2} className="mb-8">
+            Similar Products
+          </Title>
+          <Row gutter={[16, 16]}>
+            {products.slice(4, 8).map((product) => (
+              <Col xs={24} sm={12} md={6} key={product.id}>
+                <Link href={`/products/${product.id}`}>
+                  <Card
+                    hoverable
+                    cover={
+                      <div className="h-[200px] relative">
+                        <Image
+                          src={product.image || "/placeholder.svg"}
+                          alt={product.title}
+                          fill
+                          className="object-contain p-4"
+                        />
+                      </div>
+                    }
+                  >
+                    <Card.Meta
+                      title={product.title}
+                      description={
+                        <div className="mt-2">
+                          <Text className="text-lg font-semibold block">${product.price.toFixed(2)}</Text>
                         </div>
                       }
-                    >
-                      <Card.Meta
-                        title={product.title}
-                        description={
-                          <div>
-                            <Text strong>${product.price.toFixed(2)}</Text>
-                            <Text delete type="secondary" className="ml-2">
-                              ${(product.price * 1.2).toFixed(2)}
-                            </Text>
-                          </div>
-                        }
-                      />
-                    </Card>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
+                    />
+                  </Card>
+                </Link>
+              </Col>
+            ))}
+          </Row>
         </div>
-      </section>
-    </Layout>
+      </div>
+    </div>
   )
 }

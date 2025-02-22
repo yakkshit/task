@@ -1,9 +1,15 @@
+import "@ant-design/v5-patch-for-react-19"
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../lib/styles/globals.css";
-import ClientLayout from "@/components/ClientLayout";
 import type React from "react"
-import "@/lib/antd-compat"
+import { ConfigProvider, App as AntApp } from "antd";
+import { Providers } from "@/lib/providers";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/layout/Footer";
+import ClientErrorBoundary from "@/components/ClientErrorBoundary";
+import { AuthProvider } from "@/lib/hooks/useAuth";
+import SiteFooter from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,9 +36,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+        <Providers>
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "#1677ff",
+              },
+            }}
+          >
+            <AntApp>
+              <AuthProvider>
+                <ClientErrorBoundary>
+                  <Navbar />
+                  {children}
+                  <SiteFooter />
+                </ClientErrorBoundary>
+              </AuthProvider>
+            </AntApp>
+          </ConfigProvider>
+        </Providers>
       </body>
     </html>
   );

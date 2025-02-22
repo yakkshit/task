@@ -1,23 +1,26 @@
-import use from 'react' // import this line
-
+"use client"
+import { useParams } from "next/navigation"
+import { useGetProductQuery } from "@/lib/services/api"
 import ProductPageContent from "@/components/ProductPageContent"
-import { getProducts } from '@/lib/products'
+import { Spin } from "antd"
 
-export async function generateStaticParams() {
-    const products = await getProducts()
-    return products.map((product) => ({
-      id: product.id.toString(),
-    }))
+export default function ProductPage() {
+  const { id } = useParams()
+  const productId = Array.isArray(id) ? id[0] : id
+  const { data: product, isLoading, error } = useGetProductQuery(Number(productId))
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin size="large" />
+      </div>
+    )
   }
-  
-// Async/await solution
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  return <ProductPageContent id={id} />
+
+  if (error || !product) {
+    return <div>Error loading product</div>
+  }
+
+  return <ProductPageContent id={productId} />
 }
 
-// Alternatively, using the `use` hook (uncomment to use this approach)
-// export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-//   const { id } = use(params)
-//   return <ProductPageContent id={id} />
-// }
