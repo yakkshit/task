@@ -6,10 +6,9 @@ import type React from "react"
 import { ConfigProvider, App as AntApp } from "antd";
 import { Providers } from "@/lib/providers";
 import Navbar from "@/components/navbar";
-import Footer from "@/components/layout/Footer";
 import ClientErrorBoundary from "@/components/ClientErrorBoundary";
 import { AuthProvider } from "@/lib/hooks/useAuth";
-import SiteFooter from "@/components/Footer";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,7 +48,7 @@ export default function RootLayout({
                 <ClientErrorBoundary>
                   <Navbar />
                   {children}
-                  <SiteFooter />
+                  <Footer />
                 </ClientErrorBoundary>
               </AuthProvider>
             </AntApp>

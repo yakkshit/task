@@ -5,11 +5,11 @@ import { Layout, Input, Button, Typography, Card } from "antd"
 import Link from "next/link"
 
 const { Footer } = Layout
-const { Title, Text } = Typography
+const { Text } = Typography
 
 export default function SiteFooter() {
   return (
-    <Footer className="bg-white px-6 py-12 md:px-12">
+    <Footer className="bg-white py-1 md:px-12">
       {/* Newsletter Section */}
     <Card className="mb-6 bg-transparent md:bg-[#f0f0f0]" style={{ border: 'none' }}> 
         <div className="mb-1">
