@@ -1,10 +1,10 @@
 # Deploy Next.js site to GitHub Pages
-name: Deploy Next.js site to Pages
+name: Deploy products-nextjs to Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["prod/v1.0.0."]
+    branches: ["prod/v1.0.0"]
 
   # Allows manual trigger from GitHub Actions tab
   workflow_dispatch:
@@ -29,16 +29,16 @@ jobs:
       - name: Detect Package Manager
         id: detect-package-manager
         run: |
-          if [ -f "yarn.lock" ]; then
+          if [ -f "products-nextjs/yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_ENV
             echo "command=install" >> $GITHUB_ENV
             echo "runner=yarn" >> $GITHUB_ENV
-          elif [ -f "package.json" ]; then
+          elif [ -f "products-nextjs/package.json" ]; then
             echo "manager=npm" >> $GITHUB_ENV
             echo "command=ci" >> $GITHUB_ENV
             echo "runner=npx --no-install" >> $GITHUB_ENV
           else
-            echo "No package manager detected!"
+            echo "No package manager detected in products-nextjs!"
             exit 1
           fi
 
@@ -47,6 +47,7 @@ jobs:
         with:
           node-version: "20"
           cache: ${{ env.manager }}
+          cache-dependency-path: products-nextjs/package-lock.json
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
@@ -56,29 +57,32 @@ jobs:
       - name: Restore Cache
         uses: actions/cache@v4
         with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          path: products-nextjs/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('products-nextjs/**/package-lock.json', 'products-nextjs/**/yarn.lock') }}-${{ hashFiles('products-nextjs/**.[jt]s', 'products-nextjs/**.[jt]sx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('products-nextjs/**/package-lock.json', 'products-nextjs/**/yarn.lock') }}-
             ${{ runner.os }}-nextjs-
             nextjs-
 
       - name: Install Dependencies
-        run: npm ci --force
+        run: |
+          cd products-nextjs
+          ${{ env.manager }} ${{ env.command }} --force
 
       - name: Build Next.js App
-        run: npx next build
+        run: |
+          cd products-nextjs
+          ${{ env.runner }} next build
 
       - name: Export Next.js Static Files
-        run: npx next export
-
-      - name: Ensure Output Directory Exists
-        run: mkdir -p out
+        run: |
+          cd products-nextjs
+          ${{ env.runner }} next export
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: products-nextjs/out
 
   deploy:
     runs-on: ubuntu-latest
