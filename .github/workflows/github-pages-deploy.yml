@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - 'prod/v1.0.0'
+
+jobs:
+  deploy-products-nextjs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: |
+          cd products-nextjs
+          npm ci
+      - name: Build Next.js app
+        run: |
+          cd products-nextjs
+          npm run build
+          npm run export
+        env:
+          API_AUTH_KEY: ${{ secrets.PRODUCTS_API_AUTH_KEY }}
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./products-nextjs/out
+          destination_dir: products
+
+  deploy-basket-react:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: |
+          cd basket-react
+          npm ci
+      - name: Build React app
+        run: |
+          cd basket-react
+          npm run build
+        env:
+          VITE_API_URL: ${{ secrets.PRODUCTS_API_URL }}
+          VITE_API_KEY: ${{ secrets.PRODUCTS_API_AUTH_KEY }}
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./basket-react/dist
+          destination_dir: basket
