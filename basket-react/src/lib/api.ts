@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
+    baseUrl: import.meta.env.VITE_API_URL || "https://yakkshit.github.io/task/api",
     prepareHeaders: (headers) => {
       headers.set("Authorization", import.meta.env.VITE_API_KEY || "qwerty123")
       headers.set("Content-Type", "application/json")
