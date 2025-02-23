@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import NodeCache from "node-cache"
 import { corsMiddleware } from "@/lib/cors"
 
+export const dynamic = "force-dynamic";
+
 const cache = new NodeCache({ stdTTL: 600 }) // Cache expires in 10 minutes
 
 const AUTH_KEY = process.env.API_AUTH_KEY || "qwerty123"
