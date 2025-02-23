@@ -65,3 +65,5 @@ export async function OPTIONS(req: NextRequest) {
   const res = new NextResponse(null, { status: 204 })
   return corsMiddleware(req, res)
 }
+
+export const dynamic = "force-dynamic";
