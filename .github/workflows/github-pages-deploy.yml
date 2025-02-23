@@ -42,11 +42,6 @@ jobs:
         env:
           API_AUTH_KEY: ${{ secrets.PRODUCTS_API_AUTH_KEY }}
 
-      - name: Export Next.js Static Files
-        run: |
-          cd products-nextjs
-          npm run export
-
       # Build basket-react
       - name: Install Dependencies (basket-react)
         run: |
