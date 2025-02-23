@@ -1,0 +1,54 @@
+name: Deploy Basket React App
+
+on:
+  push:
+    branches: ["prod/v1.0.0"]
+    paths:
+      - 'basket-react/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: |
+          cd basket-react
+          npm ci
+
+      - name: Build React App
+        run: |
+          cd basket-react
+          npm run build
+        env:
+          VITE_API_URL: ${{ secrets.PRODUCTS_API_URL }}
+          VITE_API_KEY: ${{ secrets.PRODUCTS_API_AUTH_KEY }}
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './basket-react/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
