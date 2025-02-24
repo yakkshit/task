@@ -36,6 +36,7 @@ jobs:
           else
             echo "No package manager detected in products-nextjs!"
             exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
