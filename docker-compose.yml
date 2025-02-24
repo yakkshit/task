@@ -4,6 +4,7 @@ services:
   products-nextjs:
     build:
       context: ./products-nextjs
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"  # Next.js app on port 3000
     environment:
