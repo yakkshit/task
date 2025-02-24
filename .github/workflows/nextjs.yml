@@ -72,13 +72,13 @@ jobs:
       - name: List Output Directory
         run: |
           cd products-nextjs
-          ls -la out
+          ls -la .next
 
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-artifact@v4
         with:
           name: github-pages
-          path: products-nextjs/out  # Ensure this is the correct output directory
+          path: products-nextjs/.next  # Ensure this is the correct output directory
 
   deploy:
     runs-on: ubuntu-latest
