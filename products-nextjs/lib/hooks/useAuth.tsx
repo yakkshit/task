@@ -31,7 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string) => {
-    // Implement your login logic here
     // For now, we'll just set a mock user
     const mockUser = { id: "1", email }
     setUser(mockUser)
@@ -45,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signup = async (email: string, password: string) => {
-    // Implement your signup logic here
     // For now, we'll just set a mock user
     const mockUser = { id: "1", email }
     setUser(mockUser)
