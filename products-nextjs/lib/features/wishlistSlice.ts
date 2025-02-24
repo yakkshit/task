@@ -10,6 +10,10 @@ const initialState: WishlistState = {
   items: [],
 }
 
+/**
+ * Manages a list of products the user wishes to save, using Redux Toolkit for state management.
+ * Provides actions to add unique products to the wishlist and remove them by id.
+ */
 export const wishlistSlice = createSlice({
   name: "wishlist",
   initialState,

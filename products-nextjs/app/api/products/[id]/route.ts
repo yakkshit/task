@@ -19,6 +19,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
+/**
+ * API endpoint to update product details.
+ * Processes PUT requests to modify an existing product based on its id.
+ *
+ * @param request The request object containing the JSON payload.
+ * @param params An object containing route parameters, including the product id.
+ * @returns A JSON response with the updated product or an error message.
+ */
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const body = await request.json()
