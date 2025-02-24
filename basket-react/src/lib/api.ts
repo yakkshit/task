@@ -1,12 +1,13 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || "https://yakkshit.github.io/task/api",
+    baseUrl: import.meta.env.VITE_API_URL || "https://task-psi-ochre-97.vercel.app/api",
+    mode: "cors",
     prepareHeaders: (headers) => {
-      headers.set("Authorization", import.meta.env.VITE_API_KEY || "qwerty123")
-      headers.set("Content-Type", "application/json")
-      return headers
+      headers.set("Authorization", import.meta.env.VITE_API_KEY || "qwerty123");
+      headers.set("Content-Type", "application/json");
+      return headers;
     },
   }),
   endpoints: (builder) => ({
@@ -15,27 +16,29 @@ export const api = createApi({
     }),
     getCart: builder.query<{ items: any[] }, void>({
       query: () => "cart",
-      async onCacheEntryAdded(_arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
-        const ws = new WebSocket("ws://localhost:3001/ws/cart")
+      async onCacheEntryAdded(_arg, { cacheDataLoaded, cacheEntryRemoved, updateCachedData }) {
+        const eventSource2 = new EventSource("http://localhost:3002/events/cart");
 
         try {
-          await cacheDataLoaded
+          await cacheDataLoaded;
 
-          ws.onmessage = (event) => {
-            const updatedCart = JSON.parse(event.data)
+          const handleMessage = (event: MessageEvent) => {
+            const updatedCart = JSON.parse(event.data);
             updateCachedData((draft) => {
-              draft.items = updatedCart.items
-            })
-          }
+              draft.items = updatedCart.items;
+            });
+          };
+
+          eventSource2.onmessage = handleMessage;
         } catch (error) {
-          console.error("WebSocket error:", error)
+          console.error("SSE error:", error);
         }
 
-        await cacheEntryRemoved
-        ws.close()
+        await cacheEntryRemoved;
+        eventSource2.close();
       },
     }),
   }),
-})
+});
 
-export const { useGetOrdersQuery, useGetCartQuery } = api
+export const { useGetOrdersQuery, useGetCartQuery } = api;
