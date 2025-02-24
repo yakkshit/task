@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 export function corsMiddleware(req: NextRequest, res: NextResponse) {
   // Check if the origin is allowed
   const origin = req.headers.get("origin")
-  const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"]
+  const allowedOrigins = ["http://localhost:3002", "http://localhost:3001", process.env.DOMAIN_NAMES_URL]
 
   if (origin && allowedOrigins.includes(origin)) {
     res.headers.set("Access-Control-Allow-Origin", origin)

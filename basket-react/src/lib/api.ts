@@ -1,13 +1,13 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || "https://task-psi-ochre-97.vercel.app/api",
+    baseUrl: import.meta.env.VITE_API_URL || "https://task-psi-ochre-97.vercel.app/api/api",
     mode: "cors",
     prepareHeaders: (headers) => {
-      headers.set("Authorization", import.meta.env.VITE_API_KEY || "qwerty123");
-      headers.set("Content-Type", "application/json");
-      return headers;
+      headers.set("Authorization", import.meta.env.VITE_API_KEY || "qwerty123")
+      headers.set("Content-Type", "application/json")
+      return headers
     },
   }),
   endpoints: (builder) => ({
@@ -16,29 +16,59 @@ export const api = createApi({
     }),
     getCart: builder.query<{ items: any[] }, void>({
       query: () => "cart",
-      async onCacheEntryAdded(_arg, { cacheDataLoaded, cacheEntryRemoved, updateCachedData }) {
-        const eventSource2 = new EventSource("http://localhost:3002/events/cart");
+      async onCacheEntryAdded(_arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+        let eventSource: EventSource | null = null
+        let ws: WebSocket | null = null
 
+        // Wait until the cache is ready
+        await cacheDataLoaded
+
+        // Try using Server-Sent Events (SSE)
         try {
-          await cacheDataLoaded;
+          eventSource = new EventSource("http://localhost:3002/sse/cart")
 
-          const handleMessage = (event: MessageEvent) => {
-            const updatedCart = JSON.parse(event.data);
+          eventSource.onmessage = (event) => {
+            const updatedCart = JSON.parse(event.data)
+            console.log("SSE received updated cart:", updatedCart)
             updateCachedData((draft) => {
-              draft.items = updatedCart.items;
-            });
-          };
+              draft.items = updatedCart.items
+            })
+          }
 
-          eventSource2.onmessage = handleMessage;
+          eventSource.onerror = () => {
+            console.error("SSE connection error; falling back to WebSocket.")
+            eventSource?.close()
+
+            // Fallback to WebSocket if SSE fails
+            ws = new WebSocket("ws://localhost:3006/ws/cart")
+            ws.onmessage = (event) => {
+              const updatedCart = JSON.parse(event.data)
+              console.log("WebSocket received updated cart:", updatedCart)
+              updateCachedData((draft) => {
+                draft.items = updatedCart.items
+              })
+            }
+          }
         } catch (error) {
-          console.error("SSE error:", error);
+          console.error("Error initializing SSE:", error)
+          // On error initialize WebSocket fallback immediately
+          ws = new WebSocket("ws://localhost:3002/ws/cart")
+          ws.onmessage = (event) => {
+            const updatedCart = JSON.parse(event.data)
+            console.log("WebSocket received updated cart:", updatedCart)
+            updateCachedData((draft) => {
+              draft.items = updatedCart.items
+            })
+          }
         }
 
-        await cacheEntryRemoved;
-        eventSource2.close();
+        // Clean up connections when the cache subscription is removed
+        await cacheEntryRemoved
+        eventSource?.close()
+        ws?.close()
       },
     }),
   }),
-});
+})
 
-export const { useGetOrdersQuery, useGetCartQuery } = api;
+export const { useGetOrdersQuery, useGetCartQuery } = api
