@@ -2,8 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  basePath: "/products",
-  assetPrefix: "/products/",
   images: {
     unoptimized: true,
     domains: ["fakestoreapi.com"],
