@@ -54,16 +54,18 @@ jobs:
           cd basket-react
           npm run build
         env:
+          GITHUB_PAGES: true
           VITE_API_URL: ${{ secrets.PRODUCTS_API_URL }}
           VITE_API_KEY: ${{ secrets.PRODUCTS_API_AUTH_KEY }}
 
       # Combine build outputs
       - name: Prepare Combined Output
         run: |
-          mkdir -p ./combined-output
-          mv products-nextjs/.next/static ./combined-output/products
-          mv products-nextjs/public ./combined-output/products
-          mv basket-react/dist/* ./combined-output/basket
+          mkdir -p ./combined-output/products
+          mkdir -p ./combined-output/basket
+          cp -r products-nextjs/.next/static ./combined-output/products/
+          cp -r products-nextjs/public ./combined-output/products/
+          cp -r basket-react/dist/* ./combined-output/basket/
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
