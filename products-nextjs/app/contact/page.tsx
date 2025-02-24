@@ -8,7 +8,7 @@ const { TextArea } = Input
 export default function ContactPage() {
   const onFinish = (values: any) => {
     console.log("Form values:", values)
-    // Here you would typically send the form data to your backend
+    // where we can send data to the server
   }
 
   return (
